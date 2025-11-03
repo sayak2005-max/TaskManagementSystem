@@ -88,6 +88,39 @@
   </div>
 
 </div>
+<!-- Teacher’s Task List -->
+<div class="card shadow-sm mt-4">
+  <div class="card-header bg-light">
+    <h5 class="mb-0">Recent Tasks</h5>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped mb-0">
+      <thead class="table-primary">
+        <tr>
+          <th>#</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Assigned To</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.status }}</td>
+            <td>{% if task.assigned_to %}{{ task.assigned_to.username }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">No tasks found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
 <footer class="text-center py-3 mt-4 border-top">
   © 2025 Task Management System | All Rights Reserved

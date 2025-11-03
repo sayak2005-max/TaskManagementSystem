@@ -104,28 +104,30 @@ def get_teacher_dashboard_context(request):
 
 @login_required
 def teacher_dashboard(request):
-    # Only show data for the logged-in teacher
-    teacher = request.user
+    if request.user.role != 'Teacher':
+        return redirect('student_dashboard')
 
-    # Fetch tasks created by this teacher
-    total_tasks = Task.objects.filter(created_by=teacher).count()
-    completed_tasks = Task.objects.filter(created_by=teacher, status='Completed').count()
-    pending_tasks = Task.objects.filter(created_by=teacher, status='Pending').count()
+    total_tasks = Task.objects.filter(created_by=request.user).count()
+    completed_tasks = Task.objects.filter(created_by=request.user, status='Completed').count()
+    pending_tasks = Task.objects.filter(created_by=request.user, status='Pending').count()
 
-    # Fetch all students
     students = CustomUser.objects.filter(role='Student')
     total_students = students.count()
 
+    # Fetch tasks created by the teacher (show on dashboard)
+    tasks = Task.objects.filter(created_by=request.user).order_by('-id')
+
     context = {
-        'user': teacher,
         'total_tasks': total_tasks,
         'completed_tasks': completed_tasks,
         'pending_tasks': pending_tasks,
         'total_students': total_students,
-        'students': students[:5],  # show top 5 students in dashboard list
+        'students': students[:5],
+        'tasks': tasks,   # <-- Add this line
     }
 
     return render(request, 'tasks/teacher_dashboard.html', context)
+
 
 # ---------- Authentication ----------
 @ensure_csrf_cookie
@@ -363,40 +365,81 @@ def student_dashboard(request):
     return render(request, 'tasks/student_dashboard.html', context)
 
 # ---------- Task CRUD ----------
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import Task, CustomUser
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+from .models import Task, CustomUser
+from django.utils import timezone
+
+# ------------------ EXISTING create_task (normal view) ------------------
 @login_required
 def create_task(request):
-    # Allow Teachers and Admins to create tasks
-    if request.user.role not in ['Teacher', 'Admin']:
-        return redirect('teacher_dashboard')
-
     if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.created_by = request.user
-            task.save()
-            return redirect('teacher_dashboard')
-    else:
-        form = TaskForm()
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        assigned_to_id = request.POST.get('assigned_to')
+        due_date = request.POST.get('due_date')
+        assigned_to = CustomUser.objects.get(id=assigned_to_id) if assigned_to_id else None
 
-    return render(request, 'tasks/create_task.html', {'form': form})
+        task = Task.objects.create(
+            title=title,
+            description=description,
+            assigned_to=assigned_to,
+            created_by=request.user,
+            due_date=due_date,
+        )
+        return JsonResponse({'success': True, 'task_id': task.id})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 
+# ------------------ AJAX version for create_task (test references) ------------------
 @login_required
-def assign_task(request):
-    if request.method == 'POST':
-        form = TaskAssignForm(request.POST)
-        if form.is_valid():
-            task = form.cleaned_data['task']
-            student = form.cleaned_data['assigned_to']
-            task.assigned_to = student
-            task.save()
-            messages.success(request, f'Task "{task.title}" assigned successfully!')
-            return redirect('teacher_dashboard')
-    else:
-        form = TaskAssignForm()
+@require_POST
+def create_task_ajax(request):
+    title = request.POST.get('title')
+    description = request.POST.get('description')
+    assigned_to_id = request.POST.get('assigned_to')
+    due_date = request.POST.get('due_date')
 
-    return render(request, 'tasks/assign_task.html', {'form': form})
+    if not title or not due_date:
+        return JsonResponse({'success': False, 'error': 'Missing fields'}, status=400)
+
+    assigned_to = CustomUser.objects.filter(id=assigned_to_id).first()
+
+    task = Task.objects.create(
+        title=title,
+        description=description,
+        created_by=request.user,
+        assigned_to=assigned_to,
+        due_date=due_date,
+    )
+
+    return JsonResponse({'success': True, 'task_id': task.id})
+
+
+# ------------------ AJAX task assign ------------------
+@login_required
+@require_POST
+def assign_task_ajax(request):
+    task_id = request.POST.get('task_id')
+    student_id = request.POST.get('student_id')
+
+    if not task_id or not student_id:
+        return JsonResponse({'success': False, 'error': 'Missing IDs'}, status=400)
+
+    task = get_object_or_404(Task, id=task_id)
+    student = get_object_or_404(CustomUser, id=student_id)
+
+    task.assigned_to = student
+    task.save()
+
+    return JsonResponse({'success': True, 'message': 'Task assigned successfully'})
 
 
 @login_required
