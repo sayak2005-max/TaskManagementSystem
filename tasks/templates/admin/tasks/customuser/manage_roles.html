@@ -1,0 +1,118 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <h1>Role Management</h1>
+        
+        <form method="post" action="{% url 'admin:bulk-role-change' %}">
+            {% csrf_token %}
+            <div class="bulk-actions">
+                <select name="new_role" required>
+                    <option value="">Select New Role</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Student">Student</option>
+                </select>
+                <button type="submit" class="button">Update Selected Users</button>
+            </div>
+            
+            <div class="results">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Username</th>
+                            <th>Current Role</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td><input type="checkbox" name="user_ids" value="{{ user.id }}"></td>
+                            <td>{{ user.username }}</td>
+                            <td><span class="role-badge role-{{ user.role|lower }}">{{ user.role }}</span></td>
+                            <td>{{ user.get_full_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <a href="{% url 'admin:tasks_customuser_change' user.id %}" class="button">Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6">No users found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .bulk-actions {
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f8f8;
+        border-radius: 4px;
+    }
+    select {
+        padding: 6px 12px;
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .button {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #79aec8;
+        color: white;
+        text-decoration: none;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .button:hover {
+        background: #609ab6;
+    }
+    .role-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.9em;
+    }
+    .role-teacher {
+        background: #79aec8;
+        color: white;
+    }
+    .role-student {
+        background: #c4c4c4;
+        color: white;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background: #f5f5f5;
+    }
+    tr:hover {
+        background: #f8f8f8;
+    }
+</style>
+
+<script>
+document.getElementById('select-all').addEventListener('change', function() {
+    var checkboxes = document.getElementsByName('user_ids');
+    for(var checkbox of checkboxes) {
+        checkbox.checked = this.checked;
+    }
+});
+</script>
+{% endblock %}

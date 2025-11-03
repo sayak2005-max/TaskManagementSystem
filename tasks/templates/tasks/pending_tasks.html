@@ -1,0 +1,32 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Pending Tasks{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4 text-warning">Pending Tasks</h3>
+  <table class="table table-striped">
+    <thead class="table-warning">
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Assigned To</th>
+        <th>Deadline</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ task.title }}</td>
+        <td>{{ task.assigned_to.username }}</td>
+        <td>{{ task.deadline|date:"Y-m-d" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center text-muted">No pending tasks.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

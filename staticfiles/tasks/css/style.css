@@ -1,0 +1,108 @@
+/* ===== Global Styles ===== */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f4f7fc;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+}
+
+.nav-link {
+  color: #fff !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #ffeb3b !important;
+}
+
+/* ===== Page Content ===== */
+.container {
+  flex: 1;
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+
+/* ===== Cards ===== */
+.card {
+  border: none;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  color: #0056b3;
+  font-weight: 600;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  border-radius: 30px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #0056b3, #003c82);
+  transform: scale(1.03);
+}
+
+.btn-outline-primary {
+  color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0056b3;
+  color: #fff;
+}
+
+/* ===== Footer ===== */
+footer {
+  background: #fff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.05);
+}
+
+footer p {
+  margin: 0;
+  color: #555;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .card-body {
+    text-align: center;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

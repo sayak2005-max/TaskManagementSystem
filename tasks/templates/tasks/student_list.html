@@ -1,0 +1,37 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Student List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4 text-info">Students Managed by You</h3>
+  <table class="table table-striped">
+    <thead class="table-info">
+      <tr>
+        <th>#</th>
+        <th>Full Name</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ student.first_name }} {{ student.last_name }}</td>
+        <td>{{ student.username }}</td>
+        <td>{{ student.email }}</td>
+        <td>
+          <a href="{% url 'edit_user' student.id %}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{% url 'delete_user' student.id %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted">No students found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

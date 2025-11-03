@@ -1,0 +1,95 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="bg-primary text-white p-4 rounded-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h5>Logged in as: <span class="fw-bold text-warning">Teacher</span></h5>
+        <h3>Welcome, {{ user.first_name }} {{ user.last_name }}!</h3>
+        <p>Teacher Dashboard — Manage your tasks and students.</p>
+      </div>
+      <a href="{% url 'create_task' %}" class="btn btn-light fw-bold px-4 py-2">Create New Task</a>
+    </div>
+  </div>
+
+  <!-- Dashboard Stats as Buttons -->
+<div class="row mb-4 text-center">
+  <div class="col-md-3 mb-3">
+    <a href="{% url 'teacher_tasks' %}" class="btn btn-outline-primary w-100 py-3 rounded-4 shadow-sm">
+      <h5>Total Tasks</h5>
+      <h3>{{ total_tasks }}</h3>
+    </a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="{% url 'completed_tasks' %}" class="btn btn-outline-success w-100 py-3 rounded-4 shadow-sm">
+      <h5>Completed</h5>
+      <h3>{{ completed_tasks }}</h3>
+    </a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="{% url 'pending_tasks' %}" class="btn btn-outline-warning w-100 py-3 rounded-4 shadow-sm">
+      <h5>Pending</h5>
+      <h3>{{ pending_tasks }}</h3>
+    </a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="{% url 'student_list' %}" class="btn btn-outline-info w-100 py-3 rounded-4 shadow-sm">
+      <h5>Students</h5>
+      <h3>{{ total_students }}</h3>
+    </a>
+  </div>
+</div>
+
+  </div>
+
+  <!-- Student List Section -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="bi bi-mortarboard"></i> Student List</h5>
+      <a href="{% url 'student_list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped mb-0">
+        <thead class="table-primary">
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ student.first_name }} {{ student.last_name }}</td>
+            <td>{{ student.username }}</td>
+            <td>{{ student.email }}</td>
+            <td><span class="badge bg-success">Student</span></td>
+            <td>
+              <a href="{% url 'edit_user' student.id %}" class="btn btn-warning btn-sm">Edit</a>
+              <a href="{% url 'delete_user' student.id %}" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">No students found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<footer class="text-center py-3 mt-4 border-top">
+  © 2025 Task Management System | All Rights Reserved
+</footer>
+{% endblock %}

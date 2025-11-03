@@ -1,0 +1,190 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.utils.html import format_html
+from .models import Task, TaskFile, CustomUser
+from django.contrib.auth.models import Group, Permission
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.urls import path
+from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
+
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    actions = ['add_to_teacher_group', 'add_to_student_group', 'remove_from_teacher_group', 'remove_from_student_group']
+    list_display = ('username', 'email', 'role', 'is_active', 'is_staff', 'date_joined', 'get_actions')
+    list_filter = ('role', 'is_staff', 'is_active', 'date_joined')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('-date_joined',)
+    
+    change_list_template = 'admin/tasks/customuser/change_list.html'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('list-students/', self.admin_site.admin_view(self.list_students_view), name='list-students'),
+            path('list-teachers/', self.admin_site.admin_view(self.list_teachers_view), name='list-teachers'),
+            path('manage-users/', self.admin_site.admin_view(self.manage_users_view), name='manage-users'),
+            path('manage-roles/', self.admin_site.admin_view(self.manage_roles_view), name='manage-roles'),
+            path('all-tasks/', self.admin_site.admin_view(self.all_tasks_view), name='all-tasks'),
+            path('bulk-role-change/', self.admin_site.admin_view(self.bulk_role_change), name='bulk-role-change'),
+        ]
+        return custom_urls + urls
+
+    @method_decorator(permission_required('tasks.add_customuser'))
+    def manage_users_view(self, request):
+        context = {
+            'title': 'Manage Users',
+            'users': CustomUser.objects.all().order_by('-date_joined'),
+            **self.admin_site.each_context(request),
+        }
+        return render(request, 'admin/tasks/customuser/manage_users.html', context)
+
+    @method_decorator(permission_required('tasks.change_customuser'))
+    def manage_roles_view(self, request):
+        context = {
+            'title': 'Manage User Roles',
+            'users': CustomUser.objects.all().order_by('role', 'username'),
+            **self.admin_site.each_context(request),
+        }
+        return render(request, 'admin/tasks/customuser/manage_roles.html', context)
+
+    @method_decorator(permission_required('tasks.view_task'))
+    def all_tasks_view(self, request):
+        context = {
+            'title': 'All Tasks Overview',
+            'tasks': Task.objects.all().select_related('created_by', 'assigned_to'),
+            **self.admin_site.each_context(request),
+        }
+        return render(request, 'admin/tasks/customuser/all_tasks.html', context)
+
+    @method_decorator(permission_required('tasks.change_customuser'))
+    def bulk_role_change(self, request):
+        if request.method == 'POST':
+            user_ids = request.POST.getlist('user_ids')
+            new_role = request.POST.get('new_role')
+            if user_ids and new_role:
+                CustomUser.objects.filter(id__in=user_ids).update(role=new_role)
+                messages.success(request, f'Successfully updated roles for {len(user_ids)} users.')
+        return redirect('admin:tasks_customuser_changelist')
+    
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal Info', {'fields': ('first_name', 'last_name', 'email')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Role Info', {'fields': ('role',)}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+    )
+
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2', 'role', 'is_staff', 'is_active')}
+        ),
+    )
+    
+    def get_actions(self, obj):
+        if obj:
+            return format_html(
+                '<a class="button" href="/admin/tasks/customuser/{}/change/">Edit</a>&nbsp;'
+                '<a class="button" style="color: red;" href="/admin/tasks/customuser/{}/delete/">Delete</a>',
+                obj.id, obj.id
+            )
+        return ""
+    get_actions.short_description = 'Actions'
+    get_actions.allow_tags = True
+
+    def list_students_view(self, request):
+        context = {
+            'students': CustomUser.objects.filter(role='Student').order_by('first_name', 'last_name'),
+            'title': 'Student List',
+            **self.admin_site.each_context(request),
+        }
+        return render(request, 'admin/tasks/customuser/student_list.html', context)
+
+    def list_teachers_view(self, request):
+        context = {
+            'teachers': CustomUser.objects.filter(role='Teacher').order_by('first_name', 'last_name'),
+            'title': 'Teacher List',
+            **self.admin_site.each_context(request),
+        }
+        return render(request, 'admin/tasks/customuser/teacher_list.html', context)
+
+    def add_to_teacher_group(self, request, queryset):
+        group, _ = Group.objects.get_or_create(name='Teacher')
+        for user in queryset:
+            user.groups.add(group)
+        messages.success(request, f'Added {queryset.count()} user(s) to Teacher group.')
+    add_to_teacher_group.short_description = 'Add selected users to Teacher group'
+
+    def add_to_student_group(self, request, queryset):
+        group, _ = Group.objects.get_or_create(name='Student')
+        for user in queryset:
+            user.groups.add(group)
+        messages.success(request, f'Added {queryset.count()} user(s) to Student group.')
+    add_to_student_group.short_description = 'Add selected users to Student group'
+
+    def remove_from_teacher_group(self, request, queryset):
+        group = Group.objects.filter(name='Teacher').first()
+        if not group:
+            messages.warning(request, 'Teacher group does not exist.')
+            return
+        for user in queryset:
+            user.groups.remove(group)
+        messages.success(request, f'Removed {queryset.count()} user(s) from Teacher group.')
+    remove_from_teacher_group.short_description = 'Remove selected users from Teacher group'
+
+    def remove_from_student_group(self, request, queryset):
+        group = Group.objects.filter(name='Student').first()
+        if not group:
+            messages.warning(request, 'Student group does not exist.')
+            return
+        for user in queryset:
+            user.groups.remove(group)
+        messages.success(request, f'Removed {queryset.count()} user(s) from Student group.')
+    remove_from_student_group.short_description = 'Remove selected users from Student group'
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('title', 'assigned_to', 'created_by', 'due_date', 'status', 'get_actions')
+    list_filter = ('status', 'due_date', 'created_by', 'assigned_to')
+    search_fields = ('title', 'description', 'assigned_to__username', 'created_by__username')
+    date_hierarchy = 'due_date'
+    list_per_page = 20
+    
+    fieldsets = (
+        ('Task Information', {
+            'fields': ('title', 'description')
+        }),
+        ('Assignment Details', {
+            'fields': ('assigned_to', 'created_by', 'due_date', 'status')
+        }),
+    )
+    
+    def get_actions(self, obj):
+        if obj:
+            return format_html(
+                '<a class="button" href="/admin/tasks/task/{}/change/">Edit</a>&nbsp;'
+                '<a class="button" style="color: red;" href="/admin/tasks/task/{}/delete/">Delete</a>',
+                obj.id, obj.id
+            )
+        return ""
+    get_actions.short_description = 'Actions'
+    get_actions.allow_tags = True
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        return qs.filter(created_by=request.user)
+
+
+@admin.register(TaskFile)
+class TaskFileAdmin(admin.ModelAdmin):
+    list_display = ('task', 'file', 'uploaded_at')
+    list_filter = ('uploaded_at',)
+    search_fields = ('task__title',)
