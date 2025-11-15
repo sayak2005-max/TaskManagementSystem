@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # ---------- Home ----------
@@ -44,21 +46,24 @@ urlpatterns = [
     ),
 
     # ---------- Dashboards ----------
-    path('teacher-dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
-    path('student-dashboard/', views.student_dashboard, name='student_dashboard'),
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('assign_task/', views.assign_task, name='assign_task'),
+    path('upload_notes/', views.upload_notes, name='upload_notes'),
+    path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('students/', views.student_list, name='student_list'), 
+    path("student/update-status/", views.student_update_status_ajax, name="student_update_status_ajax"),
 
-    # ---------- Debug & Reports ----------
-    path('debug/csrf/', views.debug_csrf, name='debug_csrf'),
-    path('list-teachers/', views.list_teachers, name='list_teachers'),
-    path('list-students/', views.list_students, name='list_students'),
+
+    # ---------- Reports ----------
     path('generate-task-report/', views.generate_task_report, name='generate_task_report'),
 
-    # ---------- Admin User Management ----------
-    path('admin/users/', views.admin_user_list, name='admin_user_list'),
+    # ---------- Admin Controls ----------
+    path('admin/teachers/', views.list_teachers, name='list_teachers'),
+    path('admin/students/', views.student_list, name='list_students'),
 
     # ---------- Task Management ----------
-    path('create-task/', views.create_task_ajax, name='create_task'),
+    path('create-task/', views.create_task, name='create_task'),
     path('assign-task-ajax/', views.assign_task_ajax, name='assign_task_ajax'),
     path('update-task/<int:task_id>/', views.update_task, name='update_task'),
     path('update-task-status/<int:task_id>/', views.update_task_status, name='update_task_status'),
@@ -68,9 +73,14 @@ urlpatterns = [
     path('teacher/tasks/', views.teacher_tasks, name='teacher_tasks'),
     path('teacher/completed/', views.completed_tasks, name='completed_tasks'),
     path('teacher/pending/', views.pending_tasks, name='pending_tasks'),
-    path('teacher/students/', views.student_list, name='student_list'),
+    path('teacher/students/', views.student_list, name='teacher_student_list'),
 
     # ---------- User Management ----------
-    path('edit-user/<int:user_id>/', views.edit_user, name='edit_user'),
-    path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('edit-student/<int:student_id>/', views.edit_student, name='edit_student'),
+    path('delete-student/<int:student_id>/', views.delete_student, name='delete_student'),
+    path("ajax/create-task/", views.create_task_ajax, name="create_task_ajax"),
+    path("ajax/assign-task/", views.assign_task_ajax, name="assign_task_ajax"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(erxg=ok&b)*j%n)x!gmb-j$z_tt@@d-9o21bl-up@xft(d1r1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -55,11 +55,8 @@ ROOT_URLCONF = 'task_manager.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'task_manager' / 'templates',
-            BASE_DIR / 'tasks' / 'templates',
-        ],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'],  # optional global template folder
+        'APP_DIRS': True,  # ✅ must be True
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -70,6 +67,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'task_manager.wsgi.application'
 
@@ -128,11 +126,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # --- Media files (User uploads) ---
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default login and logout redirects
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/admin_dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -154,8 +154,9 @@ CACHES = {
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
-SESSION_COOKIE_SECURE = True  # Only send cookie over HTTPS
+SESSION_COOKIE_SECURE = False  # Only send cookie over HTTPS
 SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+CSRF_COOKIE_SECURE = False  # Only send CSRF cookie over HTTPS
 SESSION_COOKIE_SAMESITE = 'Lax'  # Protect against CSRF
 
 # Security settings

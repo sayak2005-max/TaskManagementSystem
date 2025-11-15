@@ -66,7 +66,11 @@ class TeacherActionsTest(TestCase):
         self.client.login(username='student1', password='pass')
         url = reverse('update_task_status', args=[task.id])
         data = {'status': 'Completed'}
-        response = self.client.post(url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = self.client.post(
+    reverse("student_update_status_ajax"),
+    {"task_id": task.id, "status": "Completed"}
+)
+
         self.assertEqual(response.status_code, 200)
         json = response.json()
         self.assertTrue(json.get('success'))

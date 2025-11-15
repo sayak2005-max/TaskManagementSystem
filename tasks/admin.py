@@ -15,7 +15,7 @@ from django.db.models import Q
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     actions = ['add_to_teacher_group', 'add_to_student_group', 'remove_from_teacher_group', 'remove_from_student_group']
-    list_display = ('username', 'email', 'role', 'is_active', 'is_staff', 'date_joined', 'get_actions')
+    list_display = ('username', 'email', 'role', 'is_active', 'is_staff', 'date_joined', 'user_actions')
     list_filter = ('role', 'is_staff', 'is_active', 'date_joined')
     search_fields = ('username', 'email', 'first_name', 'last_name')
     ordering = ('-date_joined',)
@@ -86,16 +86,13 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
     
-    def get_actions(self, obj):
-        if obj:
-            return format_html(
-                '<a class="button" href="/admin/tasks/customuser/{}/change/">Edit</a>&nbsp;'
-                '<a class="button" style="color: red;" href="/admin/tasks/customuser/{}/delete/">Delete</a>',
-                obj.id, obj.id
-            )
-        return ""
-    get_actions.short_description = 'Actions'
-    get_actions.allow_tags = True
+    def user_actions(self, obj):
+        return format_html(
+            '<a class="button" style="color: blue;" href="/admin/tasks/customuser/{}/change/">Edit</a>&nbsp;'
+            '<a class="button" style="color: red;" href="/admin/tasks/customuser/{}/delete/">Delete</a>',
+            obj.id, obj.id
+        )
+    user_actions.short_description = 'Actions'
 
     def list_students_view(self, request):
         context = {
@@ -146,42 +143,57 @@ class CustomUserAdmin(UserAdmin):
             user.groups.remove(group)
         messages.success(request, f'Removed {queryset.count()} user(s) from Student group.')
     remove_from_student_group.short_description = 'Remove selected users from Student group'
+   
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # ✅ Show all users if superuser
+        if request.user.is_superuser:
+            return qs
+        # Otherwise show nothing (or you could filter)
+        return qs.none()
+
+    def has_add_permission(self, request):
+        # ✅ Allow only Admins to add Teachers
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        # ✅ Allow only Admins to delete Teachers
+        return request.user.is_superuser
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ('title', 'assigned_to', 'created_by', 'due_date', 'status', 'get_actions')
-    list_filter = ('status', 'due_date', 'created_by', 'assigned_to')
+    list_display = ('title', 'assigned_to', 'created_by', 'created_at', 'status', 'action_buttons')
+    list_filter = ('status', 'created_at', 'created_by', 'assigned_to')
     search_fields = ('title', 'description', 'assigned_to__username', 'created_by__username')
-    date_hierarchy = 'due_date'
+    date_hierarchy = 'created_at'
     list_per_page = 20
-    
+
     fieldsets = (
         ('Task Information', {
             'fields': ('title', 'description')
         }),
         ('Assignment Details', {
-            'fields': ('assigned_to', 'created_by', 'due_date', 'status')
+            'fields': ('assigned_to', 'created_by', 'created_at', 'status')
         }),
     )
-    
-    def get_actions(self, obj):
-        if obj:
-            return format_html(
-                '<a class="button" href="/admin/tasks/task/{}/change/">Edit</a>&nbsp;'
-                '<a class="button" style="color: red;" href="/admin/tasks/task/{}/delete/">Delete</a>',
-                obj.id, obj.id
-            )
-        return ""
-    get_actions.short_description = 'Actions'
-    get_actions.allow_tags = True
-    
+
+    # ✅ Custom column to show Edit/Delete buttons
+    def action_buttons(self, obj):
+        return format_html(
+            '<a class="button" href="/admin/tasks/task/{}/change/">Edit</a>&nbsp;'
+            '<a class="button" style="color: red;" href="/admin/tasks/task/{}/delete/">Delete</a>',
+            obj.id, obj.id
+        )
+    action_buttons.short_description = 'Actions'
+    action_buttons.allow_tags = True
+
+    # ✅ Ensure users only see their own created tasks unless they’re admin
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
-
 
 @admin.register(TaskFile)
 class TaskFileAdmin(admin.ModelAdmin):

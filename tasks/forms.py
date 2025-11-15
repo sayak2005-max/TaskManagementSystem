@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Task, TaskFile, CustomUser
+from django.contrib.auth import get_user_model
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(
@@ -94,40 +95,23 @@ class LoginForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput)
 
 
+User = get_user_model()
+
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'assigned_to', 'status', 'due_date']
-        widgets = {
-            'title': forms.TextInput(attrs={
-                'class': 'w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none',
-                'rows': 4
-            }),
-            'assigned_to': forms.Select(attrs={
-                'class': 'w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none'
-            }),
-            'status': forms.Select(attrs={
-                'class': 'w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none'
-            }),
-            'due_date': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none'
-            }),
-        }
+        fields = ['title', 'description', 'status', 'assigned_to', 'task_type', 'attachment']
+
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        # Show only students in the dropdown
-        if user and user.role == 'Teacher':
-            self.fields['assigned_to'].queryset = CustomUser.objects.filter(role='Student')
+        # show only students to assign
+        self.fields['assigned_to'].queryset = User.objects.filter(role='Student')
 
 class StudentTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['status']
+        fields =  ['title', 'description', 'attachment',]
         widgets = {
             'status': forms.Select(attrs={
                 'class': 'w-full border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-green-500 outline-none'
