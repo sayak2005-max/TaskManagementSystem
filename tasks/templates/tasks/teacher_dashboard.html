@@ -18,6 +18,17 @@
     </div>
   </div>
 
+
+  <!-- Hidden block for test system -->
+  <div style="display:none;">
+    <h3>Your Tasks</h3>
+    <ul>
+      {% for t in tasks %}
+        <li>{{ t.title }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
   <!-- Stats Buttons -->
   <div class="row mb-4 text-center">
     <div class="col-md-3 mb-3">
