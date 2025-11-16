@@ -99,8 +99,12 @@ User = get_user_model()
 
 class TaskForm(forms.ModelForm):
     class Meta:
-        model = Task
-        fields = ['title', 'description', 'status', 'assigned_to', 'task_type', 'attachment']
+         model = Task
+         fields = "__all__"   
+     
+         widgets = {
+            "created_at": forms.DateTimeInput(attrs={"type": "datetime-local"})
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)

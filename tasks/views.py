@@ -646,3 +646,22 @@ def student_update_status_ajax(request):
     task.save()
 
     return JsonResponse({"success": True}, status=200)
+
+@login_required
+@staff_member_required
+def admin_student_list(request):
+    students = CustomUser.objects.filter(role="Student")
+    return render(request, 'tasks/admin/student_list.html', {
+        "users": students,
+        "title": "Student List",
+    })
+
+
+@login_required
+@staff_member_required
+def admin_teacher_list(request):
+    teachers = CustomUser.objects.filter(role="Teacher")
+    return render(request, 'tasks/admin/teacher_list.html', {
+        "users": teachers,
+        "title": "Teacher List",
+    })

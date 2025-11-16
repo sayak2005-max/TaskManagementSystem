@@ -51,16 +51,15 @@ urlpatterns = [
     path('upload_notes/', views.upload_notes, name='upload_notes'),
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('students/', views.student_list, name='student_list'), 
+    path('students/', views.student_list, name='student_list'),
     path("student/update-status/", views.student_update_status_ajax, name="student_update_status_ajax"),
-
 
     # ---------- Reports ----------
     path('generate-task-report/', views.generate_task_report, name='generate_task_report'),
 
     # ---------- Admin Controls ----------
-    path('admin/teachers/', views.list_teachers, name='list_teachers'),
-    path('admin/students/', views.student_list, name='list_students'),
+    path('admin-panel/students/', views.admin_student_list, name='admin_student_list'),
+    path('admin-panel/teachers/', views.admin_teacher_list, name='admin_teacher_list'),
 
     # ---------- Task Management ----------
     path('create-task/', views.create_task, name='create_task'),
@@ -80,6 +79,7 @@ urlpatterns = [
     path('delete-student/<int:student_id>/', views.delete_student, name='delete_student'),
     path("ajax/create-task/", views.create_task_ajax, name="create_task_ajax"),
     path("ajax/assign-task/", views.assign_task_ajax, name="assign_task_ajax"),
+    path('list-teachers/', views.list_teachers, name='list_teachers'),
 ]
 
 if settings.DEBUG:

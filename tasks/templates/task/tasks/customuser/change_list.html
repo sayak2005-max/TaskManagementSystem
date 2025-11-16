@@ -4,17 +4,15 @@
 {% block object-tools-items %}
     {% if request.user.is_superuser or perms.tasks.view_customuser %}
     <li>
-        <a href="{% url 'admin:list-students' %}" class="button">
-            {% trans "View Student List" %}
-        </a>
+        <a href="{% url 'admin_student_list' %}" class="button">Student List</a>
+
     </li>
+
     <li>
-        <a href="{% url 'admin:list-teachers' %}" class="button">
-            {% trans "View Teacher List" %}
-        </a>
+        <a href="{% url 'admin_teacher_list' %}" class="button">Teacher List</a>
     </li>
     {% endif %}
-    
+
     {% if request.user.is_superuser or perms.tasks.change_customuser %}
     <li>
         <a href="{% url 'admin:manage-users' %}" class="button">
@@ -27,7 +25,7 @@
         </a>
     </li>
     {% endif %}
-    
+
     {% if request.user.is_superuser or perms.tasks.view_task %}
     <li>
         <a href="{% url 'admin:all-tasks' %}" class="button">
@@ -35,13 +33,10 @@
         </a>
     </li>
     {% endif %}
-    
+
     {{ block.super }}
 {% endblock %}
 
 {% block content %}
-    {# Always render the normal change_list content so the admin shows model lists.
-       Only use permissions to toggle the extra custom buttons above. If an admin
-       user lacks tasks permissions they'll still see the regular admin entries. #}
     {{ block.super }}
 {% endblock %}

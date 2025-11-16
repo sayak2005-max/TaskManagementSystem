@@ -14,14 +14,18 @@ from django.db.models import Q
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    actions = ['add_to_teacher_group', 'add_to_student_group', 'remove_from_teacher_group', 'remove_from_student_group']
-    list_display = ('username', 'email', 'role', 'is_active', 'is_staff', 'date_joined', 'user_actions')
-    list_filter = ('role', 'is_staff', 'is_active', 'date_joined')
-    search_fields = ('username', 'email', 'first_name', 'last_name')
-    ordering = ('-date_joined',)
-    
-    change_list_template = 'admin/tasks/customuser/change_list.html'
+    list_display = ("username", "first_name", "last_name", "email", "role", "is_staff")
+    list_filter = ("role", "is_staff", "is_superuser", "is_active")
+    search_fields = ("username", "first_name", "last_name", "email")
+    ordering = ("username",)
 
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        ("Personal Info", {"fields": ("first_name", "last_name", "email")}),
+        ("Roles", {"fields": ("role",)}),
+        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser")}),
+        ("Important Dates", {"fields": ("last_login", "date_joined")}),
+    )
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -169,16 +173,23 @@ class TaskAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_at'
     list_per_page = 20
 
+    # Mark created_at as readonly instead of excluding it
+    readonly_fields = ('created_at',)
+
     fieldsets = (
         ('Task Information', {
             'fields': ('title', 'description')
         }),
         ('Assignment Details', {
-            'fields': ('assigned_to', 'created_by', 'created_at', 'status')
+            'fields': ('assigned_to', 'created_by', 'status', 'created_at')
         }),
     )
 
-    # ✅ Custom column to show Edit/Delete buttons
+    # IMPORTANT FIX 🔥
+    # Tell Django which admin handles this ForeignKey
+    raw_id_fields = ('assigned_to', 'created_by')
+    autocomplete_fields = ('assigned_to', 'created_by')
+
     def action_buttons(self, obj):
         return format_html(
             '<a class="button" href="/admin/tasks/task/{}/change/">Edit</a>&nbsp;'
@@ -188,12 +199,12 @@ class TaskAdmin(admin.ModelAdmin):
     action_buttons.short_description = 'Actions'
     action_buttons.allow_tags = True
 
-    # ✅ Ensure users only see their own created tasks unless they’re admin
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
         return qs.filter(created_by=request.user)
+
 
 @admin.register(TaskFile)
 class TaskFileAdmin(admin.ModelAdmin):
