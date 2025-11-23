@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from datetime import timedelta
+
 
 # ✅ Custom User Model
 class CustomUser(AbstractUser):
@@ -10,6 +13,8 @@ class CustomUser(AbstractUser):
         ('Student', 'Student'),
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Student')
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -41,7 +46,19 @@ class CustomUser(AbstractUser):
             ("assign_roles", "Can assign roles to users"),
             ("view_all_tasks", "Can view all tasks in the system"),
         ]
+    def set_otp(self, otp):
+        self.otp = otp
+        self.otp_created_at = timezone.now()
+        self.save()
 
+    def verify_otp(self, otp):
+        if self.otp != otp:
+            return False
+        
+        if timezone.now() > self.otp_created_at + timezone.timedelta(minutes=5):
+            return False
+        
+        return True
 
 # ✅ Task Model
 class Task(models.Model):

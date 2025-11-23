@@ -9,9 +9,13 @@ urlpatterns = [
     path('', views.home, name='home'),
 
     # ---------- Authentication ----------
-    path('register/', views.register, name='register'),
+    path("register/", views.register, name="register"),
     path('login/', views.login_view, name='login'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('resend-otp/', views.resend_otp, name='resend_otp'),
     path('logout/', views.logout_view, name='logout'),
+    path('register/', views.register_view, name='register'),
+    path('register/verify-otp/', views.register_verify_otp, name='register_verify_otp'),
 
     # ---------- Password Reset ----------
     path(
