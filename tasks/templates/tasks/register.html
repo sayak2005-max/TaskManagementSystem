@@ -1,0 +1,267 @@
+{% extends 'tasks/base.html' %}
+
+{% block title %}Register - Task Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-5">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Create an Account</h2>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" novalidate class="needs-validation" id="register-form">
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <!-- First Name and Last Name -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name*</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name*</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Username and Email -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">Username*</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.username.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email Address*</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.role.id_for_label }}" class="form-label">Select Role*</label>
+                                {{ form.role }}
+                                {% if form.role.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.role.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Password and Confirm Password -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label">Password*</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password1.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text text-muted small">
+                                    <ul class="mb-0">
+                                        <li>Your password must contain at least 8 characters</li>
+                                        <li>Your password can't be entirely numeric</li>
+                                        <li>Use a mix of letters, numbers, and symbols</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label">Confirm Password*</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password2.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# OTP block: shown after server sends OTP and returns show_otp=True #}
+                    {% if show_otp %}
+                        <hr class="my-4"/>
+                        <div id="otp-block">
+                            <div class="mb-3">
+                                <label for="otp" class="form-label">Enter OTP*</label>
+                                <input id="otp" name="otp" class="form-control" inputmode="numeric"
+                                       autocomplete="one-time-code" maxlength="6" pattern="\d{6}" required>
+                                <div class="form-text small text-muted mt-1">
+                                    Enter the 6-digit OTP sent to your email. OTP is valid for
+                                    <span id="otp-timer">--:--</span>.
+                                </div>
+
+                                {% if otp_error %}
+                                    <div class="invalid-feedback d-block mt-2">
+                                        {{ otp_error }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" name="verify_otp" value="1" class="btn btn-success" id="verify-btn">
+                                    Verify OTP
+                                </button>
+
+                                <button type="submit" name="resend_otp" value="1" class="btn btn-outline-secondary" id="resend-btn">
+                                    Resend OTP
+                                </button>
+
+                                <a href="{% url 'register' %}" class="btn btn-link ms-auto">Edit details</a>
+                            </div>
+
+                            {# data element for safe JS access to TTL #}
+                            <div id="otp-data" data-ttl="{{ otp_ttl_seconds|default:300 }}"></div>
+                        </div>
+                    {% else %}
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                        </div>
+                    {% endif %}
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+    }
+
+    .form-text ul {
+        padding-left: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .btn-primary {
+        padding: 0.75rem;
+        font-weight: 500;
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+/* OTP timer: reads TTL from #otp-data data-ttl attribute and runs countdown.
+   Safe: if #otp-data is absent (no OTP step) script does nothing. */
+(function () {
+  try {
+    var dataEl = document.getElementById('otp-data');
+    if (!dataEl) return; // not in OTP step -> nothing to do
+
+    var ttlRaw = dataEl.getAttribute('data-ttl');
+    var ttl = parseInt(ttlRaw, 10);
+    if (isNaN(ttl) || ttl <= 0) ttl = 300; // fallback 5 minutes
+
+    var timerEl = document.getElementById('otp-timer');
+    var otpInput = document.getElementById('otp');
+    var verifyBtn = document.querySelector('button[name="verify_otp"]');
+    var resendBtn = document.getElementById('resend-btn');
+
+    var remaining = ttl;
+
+    function fmt(s) {
+      var m = Math.floor(s / 60).toString().padStart(2, '0');
+      var sec = (s % 60).toString().padStart(2, '0');
+      return m + ":" + sec;
+    }
+
+    if (timerEl) timerEl.textContent = fmt(remaining);
+
+    var interval = setInterval(function () {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(interval);
+        if (timerEl) timerEl.textContent = "00:00 (expired)";
+        if (verifyBtn) verifyBtn.disabled = true;
+      } else {
+        if (timerEl) timerEl.textContent = fmt(remaining);
+      }
+    }, 1000);
+
+    if (otpInput) {
+      otpInput.focus();
+      try { otpInput.select(); } catch (e) { /* ignore */ }
+    }
+
+    // Disable non-OTP inputs to avoid accidental edits while verifying
+    (function disableMainInputs() {
+      var form = document.getElementById('register-form');
+      if (!form) return;
+      var inputs = form.querySelectorAll('input, select, textarea, button');
+      for (var i = 0; i < inputs.length; i++) {
+        var el = inputs[i];
+        if (!el) continue;
+        // keep essential elements enabled
+        if (el.name === 'verify_otp' || el.name === 'resend_otp' || el.name === 'csrfmiddlewaretoken' || el.name === 'otp') continue;
+        // don't disable hidden fields
+        if (el.type === 'hidden') continue;
+        el.disabled = true;
+      }
+    })();
+
+    // Client-side reset of timer when user clicks resend (server also sends new OTP)
+    if (resendBtn) {
+      resendBtn.addEventListener('click', function () {
+        remaining = ttl;
+        if (timerEl) timerEl.textContent = fmt(remaining);
+        if (verifyBtn) verifyBtn.disabled = false;
+      }, false);
+    }
+  } catch (err) {
+    console.error("OTP timer error:", err);
+  }
+})();
+</script>
+{% endblock %}

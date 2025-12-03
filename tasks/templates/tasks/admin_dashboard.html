@@ -1,0 +1,196 @@
+{% extends 'tasks/base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- 🟢 Logged-in Role Display -->
+    <div class="alert alert-info text-center fw-bold shadow-sm rounded-3 mb-4">
+        Logged in as: <span class="text-primary">{{ request.user.role }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Admin Dashboard</h2>
+        <div>
+            <a href="{% url 'admin:tasks_customuser_add' %}" class="btn btn-success me-2">
+    <i class="fas fa-user-plus"></i> Add New User
+</a>
+
+<a href="{% url 'admin:tasks_task_add' %}" class="btn btn-primary me-2">
+    <i class="fas fa-plus"></i> Create Task
+</a>
+
+<a href="{% url 'admin_teacher_list' %}" class="btn btn-secondary me-2">
+    Teacher List
+</a>
+
+<a href="{% url 'admin_student_list' %}" class="btn btn-secondary">
+    Student List
+</a>
+
+
+ 
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Users</h6>
+                            <h2 class="card-title mb-0">{{ stats.total_users }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-primary border-0">
+                    <a href="{% url 'admin:tasks_customuser_changelist' %}" class="text-white text-decoration-none">
+                        View Details <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Tasks</h6>
+                            <h2 class="card-title mb-0">{{ stats.total_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-tasks fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-info border-0">
+                    <a href="{% url 'admin:tasks_task_changelist' %}" class="text-white text-decoration-none">
+                        View Details <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Completed Tasks</h6>
+                            <h2 class="card-title mb-0">{{ stats.completed_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-success border-0">
+                    <a href="{% url 'admin:tasks_task_changelist' %}?status=Completed" class="text-white text-decoration-none">
+                        View Details <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Pending Tasks</h6>
+                            <h2 class="card-title mb-0">{{ stats.pending_tasks }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-warning border-0">
+                    <a href="{% url 'admin:tasks_task_changelist' %}?status=Pending" class="text-white text-decoration-none">
+                        View Details <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Cards -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">User Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'list_teachers' %}">Manage Teachers</a>
+                    
+                        <a href="{% url 'student_list' %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Students
+                            <span class="badge bg-primary rounded-pill">{{ stats.total_students }}</span>
+                        </a>
+                        <a href="{% url 'admin:auth_group_changelist' %}" class="list-group-item list-group-item-action">
+                            Manage User Groups & Permissions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Task Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'admin:tasks_task_changelist' %}?due_date__lte={{ today }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            Tasks Due Today
+                            <span class="badge bg-danger rounded-pill">{{ stats.tasks_due_today }}</span>
+                        </a>
+                        <a href="{% url 'admin:tasks_task_changelist' %}?created_at__gte={{ week_ago }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            New Tasks This Week
+                            <span class="badge bg-info rounded-pill">{{ stats.new_tasks_this_week }}</span>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#taskReportModal">
+                            Generate Task Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Task Report Modal -->
+<div class="modal fade" id="taskReportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate Task Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'generate_task_report' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <select class="form-select" name="date_range">
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                            <option value="quarter">Last Quarter</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Report Type</label>
+                        <select class="form-select" name="report_type">
+                            <option value="summary">Summary Report</option>
+                            <option value="detailed">Detailed Report</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

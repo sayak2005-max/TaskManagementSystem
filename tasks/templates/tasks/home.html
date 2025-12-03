@@ -1,0 +1,61 @@
+{% extends 'tasks/base.html' %}
+
+{% block title %}Welcome to Task Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Welcome to Task Management System</h1>
+        <p class="lead mb-4">A simple and efficient way to manage tasks between teachers and students.</p>
+        
+        {% if not user.is_authenticated %}
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="{% url 'register' %}" class="btn btn-success btn-lg px-4 gap-3">
+                    <i class="fas fa-user-plus me-2"></i>Register Now
+                </a>
+                <a href="{% url 'login' %}" class="btn btn-info btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3 class="card-title text-success">
+                                <i class="fas fa-chalkboard-teacher mb-3"></i>
+                                For Teachers
+                            </h3>
+                            <p class="card-text">Create and assign tasks to students, track progress, and manage submissions effectively.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3 class="card-title text-info">
+                                <i class="fas fa-user-graduate mb-3"></i>
+                                For Students
+                            </h3>
+                            <p class="card-text">View assigned tasks, submit your work, and track your progress easily.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Welcome back, {{ user.username }}!</h4>
+                <p>You are logged in as a {{ user.role }}.</p>
+                <hr>
+                <p class="mb-0">
+                    {% if user.role == 'Teacher' %}
+                        <a href="{% url 'teacher_dashboard' %}" class="btn btn-primary">Go to Teacher Dashboard</a>
+                    {% elif user.role == 'Student' %}
+                        <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Go to Student Dashboard</a>
+                    {% endif %}
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

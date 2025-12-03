@@ -1,0 +1,74 @@
+{% extends 'tasks/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-lg p-4 rounded-4">
+    <h2 class="text-center mb-4 text-primary fw-bold">Create New Task</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" name="title" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="3"></textarea>
+      </div>
+
+      <!-- ✅ Students field with popup -->
+      <div class="mb-3">
+        <label class="form-label">Assign To (Students)</label><br>
+        <button type="button" id="selectAllBtn" class="btn btn-sm btn-secondary mb-2">Select All</button>
+        <select id="students" name="students" multiple class="form-select" required>
+          {% for student in students %}
+            <option value="{{ student.id }}">{{ student.username }}</option>
+          {% endfor %}
+        </select>
+        <small class="text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple students manually.</small>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Due Date</label>
+        <input type="date" name="due_date" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Attachment (optional)</label>
+        <input type="file" name="attachment" class="form-control">
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg px-4">Create Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ✅ JS popup confirmation -->
+<script>
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const selectBox = document.getElementById('students');
+  let allSelected = false;
+
+  selectAllBtn.addEventListener('click', function() {
+    Swal.fire({
+      title: allSelected ? 'Deselect all students?' : 'Select all students?',
+      text: allSelected ? "This will unselect everyone." : "This will select every student in the list.",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: allSelected ? 'Yes, Deselect All' : 'Yes, Select All',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        for (let i = 0; i < selectBox.options.length; i++) {
+          selectBox.options[i].selected = !allSelected;
+        }
+        allSelected = !allSelected;
+        selectAllBtn.textContent = allSelected ? 'Deselect All' : 'Select All';
+      }
+    });
+  });
+</script>
+{% endblock %}

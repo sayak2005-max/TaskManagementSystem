@@ -1,0 +1,30 @@
+{% extends "tasks/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Teacher List</h2>
+
+    {% if teachers %}
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teachers %}
+                <tr>
+                    <td>{{ teacher.username }}</td>
+                    <td>{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                    <td>{{ teacher.email }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No teachers found.</p>
+    {% endif %}
+</div>
+{% endblock %}
