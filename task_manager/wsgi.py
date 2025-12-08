@@ -1,7 +1,7 @@
 import os
 import sys
 
-path = '/home/yourusername/TaskManagementSystem'
+path = '/home/sayak0904/TaskManagementSystem'
 if path not in sys.path:
     sys.path.insert(0, path)
 
