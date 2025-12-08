@@ -185,43 +185,66 @@ def create_task(request):
 @login_required
 def assign_task(request):
     """
-    Bulk assign tasks (regular form). Kept for non-AJAX flows.
+    Bulk assign tasks (regular form).
+    Supports:
+    - title
+    - due_date
+    - students (multi-select)
+    - Select All button in template
+    - optional task_type, attachment
     """
     if getattr(request.user, "role", None) != "Teacher":
         messages.error(request, "Unauthorized")
         return redirect("home")
 
+    # Students list for form
+    students = CustomUser.objects.filter(role="Student").order_by("first_name", "last_name")
+
     if request.method == "POST":
-        title = request.POST.get("title")
-        task_type = request.POST.get("task_type")
-        selected_students = request.POST.getlist("selected_students")
+        title = request.POST.get("title", "").strip()
+        task_type = request.POST.get("task_type", "").strip()
+        due_date = request.POST.get("due_date") or None
         attachment = request.FILES.get("attachment")
+
+        # Supports both new & old field names
+        selected_students = request.POST.getlist("students") or request.POST.getlist("selected_students")
+
+        # --- Validation ---
+        if not title:
+            messages.error(request, "Please enter a task title.")
+            return render(request, "tasks/assign_task.html", {"students": students})
 
         if not selected_students:
             messages.warning(request, "Please select at least one student.")
-            return redirect("teacher_dashboard")
+            return render(request, "tasks/assign_task.html", {"students": students})
 
+        # --- Assign Task to every student ---
         created_count = 0
         for sid in selected_students:
             try:
                 student = CustomUser.objects.get(pk=sid, role="Student")
             except CustomUser.DoesNotExist:
                 continue
+
             Task.objects.create(
                 title=title,
-                task_type=task_type,
+                task_type=task_type or None,
                 created_by=request.user,
                 assigned_to=student,
+                due_date=due_date,
                 attachment=attachment,
+                status="Pending",
             )
             created_count += 1
 
         messages.success(
-            request, f"Task '{title}' assigned to {created_count} student(s)."
+            request,
+            f"Task '{title}' assigned to {created_count} student(s)."
         )
         return redirect("teacher_dashboard")
 
-    return redirect("teacher_dashboard")
+    # --- GET request ---
+    return render(request, "tasks/assign_task.html", {"students": students})
 
 
 @login_required

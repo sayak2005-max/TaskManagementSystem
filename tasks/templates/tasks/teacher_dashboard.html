@@ -18,7 +18,6 @@
     </div>
   </div>
 
-
   <!-- Hidden block for test system -->
   <div style="display:none;">
     <h3>Your Tasks</h3>
@@ -191,11 +190,13 @@
         </div>
         <div class="modal-body">
 
+          <!-- Task Title -->
           <div class="mb-3">
             <label class="form-label">Task Title</label>
             <input type="text" name="title" class="form-control" required>
           </div>
 
+          <!-- Task Type -->
           <div class="mb-3">
             <label class="form-label">Task Type</label>
             <select name="task_type" class="form-select" required>
@@ -208,18 +209,33 @@
             </select>
           </div>
 
+          <!-- ✅ Due Date -->
+          <div class="mb-3">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="due_date" class="form-control">
+          </div>
+
+          <!-- ✅ Select Students (with Select All when >= 2) -->
           <div class="mb-3">
             <label class="form-label">Select Students</label>
+
+            {% if students|length >= 2 %}
+            <button type="button" id="modalSelectAllBtn" class="btn btn-sm btn-secondary mb-2">
+              Select All
+            </button>
+            {% endif %}
+
             <div class="border p-2 rounded" style="max-height:200px; overflow:auto;">
               {% for student in students %}
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="selected_students" value="{{ student.id }}">
+                <input class="form-check-input modal-student-checkbox" type="checkbox" name="selected_students" value="{{ student.id }}">
                 <label class="form-check-label">{{ student.first_name }} {{ student.last_name }}</label>
               </div>
               {% endfor %}
             </div>
           </div>
 
+          <!-- Attachment -->
           <div class="mb-3">
             <label class="form-label">Attach File (optional)</label>
             <input type="file" name="attachment" class="form-control">
@@ -228,7 +244,7 @@
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Assign Task</button>
+          <button type="submit" class="btn btn_success btn btn-success">Assign Task</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
 
@@ -237,13 +253,35 @@
   </div>
 </div>
 
-<!-- Select All Script -->
 <script>
-document.getElementById('selectAll').addEventListener('change', function() {
-  document.querySelectorAll('.student-checkbox').forEach(cb => {
-    cb.checked = this.checked;
+  // Toggle Select All for student table
+  let tableAllSelected = false;
+  const tableSelectAllBtn = document.getElementById('selectAll');
+
+  tableSelectAllBtn?.addEventListener('click', function () {
+    tableAllSelected = !tableAllSelected;
+
+    document.querySelectorAll('.student-checkbox').forEach(cb => {
+      cb.checked = tableAllSelected;
+    });
+
+    this.checked = tableAllSelected;
   });
-});
+
+  // Toggle Select All for modal
+  let modalAllSelected = false;
+  const modalSelectAllBtn = document.getElementById('modalSelectAllBtn');
+
+  modalSelectAllBtn?.addEventListener('click', function () {
+    modalAllSelected = !modalAllSelected;
+
+    document.querySelectorAll('.modal-student-checkbox').forEach(cb => {
+      cb.checked = modalAllSelected;
+    });
+
+    modalSelectAllBtn.textContent = modalAllSelected ? "Deselect All" : "Select All";
+  });
 </script>
+
 
 {% endblock %}
