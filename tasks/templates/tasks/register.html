@@ -22,7 +22,7 @@
                     {% csrf_token %}
 
                     <div class="row g-3">
-                        <!-- First Name and Last Name -->
+                      
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name*</label>
@@ -46,7 +46,7 @@
                             </div>
                         </div>
 
-                        <!-- Username and Email -->
+                        
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label for="{{ form.username.id_for_label }}" class="form-label">Username*</label>
@@ -70,7 +70,7 @@
                             </div>
                         </div>
 
-                        <!-- Role -->
+                    
                         <div class="col-12">
                             <div class="form-group mb-3">
                                 <label for="{{ form.role.id_for_label }}" class="form-label">Select Role*</label>
@@ -83,7 +83,7 @@
                             </div>
                         </div>
 
-                        <!-- Password and Confirm Password -->
+                        
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label for="{{ form.password1.id_for_label }}" class="form-label">Password*</label>
@@ -193,16 +193,14 @@
 </style>
 
 <script>
-/* OTP timer: reads TTL from #otp-data data-ttl attribute and runs countdown.
-   Safe: if #otp-data is absent (no OTP step) script does nothing. */
 (function () {
   try {
     var dataEl = document.getElementById('otp-data');
-    if (!dataEl) return; // not in OTP step -> nothing to do
+    if (!dataEl) return; 
 
     var ttlRaw = dataEl.getAttribute('data-ttl');
     var ttl = parseInt(ttlRaw, 10);
-    if (isNaN(ttl) || ttl <= 0) ttl = 300; // fallback 5 minutes
+    if (isNaN(ttl) || ttl <= 0) ttl = 300; 
 
     var timerEl = document.getElementById('otp-timer');
     var otpInput = document.getElementById('otp');
@@ -232,10 +230,9 @@
 
     if (otpInput) {
       otpInput.focus();
-      try { otpInput.select(); } catch (e) { /* ignore */ }
+      try { otpInput.select(); } catch (e) {  }
     }
 
-    // Disable non-OTP inputs to avoid accidental edits while verifying
     (function disableMainInputs() {
       var form = document.getElementById('register-form');
       if (!form) return;
@@ -243,15 +240,15 @@
       for (var i = 0; i < inputs.length; i++) {
         var el = inputs[i];
         if (!el) continue;
-        // keep essential elements enabled
+        
         if (el.name === 'verify_otp' || el.name === 'resend_otp' || el.name === 'csrfmiddlewaretoken' || el.name === 'otp') continue;
-        // don't disable hidden fields
+        
         if (el.type === 'hidden') continue;
         el.disabled = true;
       }
     })();
 
-    // Client-side reset of timer when user clicks resend (server also sends new OTP)
+    
     if (resendBtn) {
       resendBtn.addEventListener('click', function () {
         remaining = ttl;

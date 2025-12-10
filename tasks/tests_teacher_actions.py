@@ -7,7 +7,6 @@ from datetime import date, timedelta
 
 class TeacherActionsTest(TestCase):
     def setUp(self):
-        # Create teacher and student users
         self.teacher = CustomUser.objects.create_user(username='teacher1', password='pass', role='Teacher')
         self.student = CustomUser.objects.create_user(username='student1', password='pass', role='Student')
         self.client = Client()
@@ -28,10 +27,7 @@ class TeacherActionsTest(TestCase):
         self.assertEqual(Task.objects.filter(title='Test Task').count(), 1)
 
     def test_assign_task_ajax(self):
-        # Log in as teacher
         self.client.login(username='teacher1', password='pass')
-
-        # Create a task before assigning
         task = Task.objects.create(
             title="Sample Task",
             description="Test task for assignment",
@@ -39,22 +35,16 @@ class TeacherActionsTest(TestCase):
             created_by=self.teacher
         )
 
-        # Prepare the AJAX request data
         data = {
             'task_id': task.id,
             'student_id': self.student.id,
         }
 
         url = reverse('assign_task_ajax')
-
-        # Send POST request as AJAX
         response = self.client.post(url, data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-
-        # Assert response is successful
         self.assertEqual(response.status_code, 200)
 
     def test_student_update_status_ajax(self):
-        # Create a task assigned to student
         task = Task.objects.create(
             title='Student Task',
             created_by=self.teacher,

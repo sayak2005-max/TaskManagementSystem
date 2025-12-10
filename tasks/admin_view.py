@@ -4,9 +4,6 @@ from django.contrib.auth import get_user_model
 
 CustomUser = get_user_model()
 
-# ---------------------------
-# STUDENT LIST PAGE
-# ---------------------------
 @staff_member_required
 def admin_student_list(request):
     students = CustomUser.objects.filter(role="Student")
@@ -16,10 +13,6 @@ def admin_student_list(request):
         "simple": True,
     })
 
-
-# ---------------------------
-# TEACHER LIST PAGE
-# ---------------------------
 @staff_member_required
 def admin_teacher_list(request):
     teachers = CustomUser.objects.filter(role="Teacher")

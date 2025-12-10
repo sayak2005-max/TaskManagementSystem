@@ -1,4 +1,3 @@
-# tasks/models.py
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -25,7 +24,6 @@ class CustomUser(AbstractUser):
             return False
         if not self.otp_created_at:
             return False
-        # OTP valid for 5 minutes
         return timezone.now() <= self.otp_created_at + timedelta(minutes=5)
 
     def __str__(self):

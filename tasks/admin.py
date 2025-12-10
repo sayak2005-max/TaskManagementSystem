@@ -150,18 +150,14 @@ class CustomUserAdmin(UserAdmin):
    
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # ✅ Show all users if superuser
         if request.user.is_superuser:
             return qs
-        # Otherwise show nothing (or you could filter)
         return qs.none()
 
     def has_add_permission(self, request):
-        # ✅ Allow only Admins to add Teachers
         return request.user.is_superuser
 
     def has_delete_permission(self, request, obj=None):
-        # ✅ Allow only Admins to delete Teachers
         return request.user.is_superuser
 
 
@@ -172,8 +168,6 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description', 'assigned_to__username', 'created_by__username')
     date_hierarchy = 'created_at'
     list_per_page = 20
-
-    # Mark created_at as readonly instead of excluding it
     readonly_fields = ('created_at',)
 
     fieldsets = (
@@ -185,8 +179,6 @@ class TaskAdmin(admin.ModelAdmin):
         }),
     )
 
-    # IMPORTANT FIX 🔥
-    # Tell Django which admin handles this ForeignKey
     raw_id_fields = ('assigned_to', 'created_by')
     autocomplete_fields = ('assigned_to', 'created_by')
 

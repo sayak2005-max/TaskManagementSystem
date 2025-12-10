@@ -1,8 +1,7 @@
-# tasks/utils.py
 import random
 import time
 
-OTP_TTL_SECONDS = 300  # 5 minutes
+OTP_TTL_SECONDS = 300  
 MAX_OTP_ATTEMPTS = 3
 
 

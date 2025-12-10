@@ -4,7 +4,7 @@
 
 <div class="container-fluid py-4">
 
-  <!-- Header -->
+  
   <div class="bg-primary text-white p-4 rounded-3 mb-4 shadow-sm">
     <div class="d-flex justify-content-between align-items-center">
       <div>
@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <!-- Hidden block for test system -->
+  
   <div style="display:none;">
     <h3>Your Tasks</h3>
     <ul>
@@ -28,7 +28,7 @@
     </ul>
   </div>
 
-  <!-- Stats Buttons -->
+  
   <div class="row mb-4 text-center">
     <div class="col-md-3 mb-3">
       <a href="{% url 'teacher_tasks' %}" class="btn btn-outline-primary w-100 py-3 rounded-4 shadow-sm">
@@ -56,7 +56,7 @@
     </div>
   </div>
 
-  <!-- Student List -->
+  
   <div class="card shadow-sm">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
       <h5 class="mb-0"><i class="bi bi-mortarboard"></i> Student List</h5>
@@ -94,7 +94,7 @@
     </div>
   </div>
 
-  <!-- Test Compatibility: Hidden Task List -->
+  
   <div style="display:none;">
       <h3>Your Tasks</h3>
       <ul>
@@ -106,7 +106,7 @@
       </ul>
   </div>
 
-  <!-- Visible Task Table -->
+  
   <div class="card shadow-sm mt-4">
       <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h5 class="mb-0"><i class="bi bi-list-task"></i> Your Tasks</h5>
@@ -130,7 +130,7 @@
                       <td>{{ forloop.counter }}</td>
                       <td>{{ task.title }}</td>
 
-                      <!-- Prevent GitHub test crash -->
+                     
                       <td>
                         {% if task.assigned_to %}
                             {{ task.assigned_to.username }}
@@ -159,7 +159,7 @@
       </div>
   </div>
 
-  <!-- Upload Notes -->
+  
   <div class="card shadow-sm mt-4">
     <div class="card-header bg-light">
       <h5 class="mb-0">Upload Notes for Students</h5>
@@ -178,7 +178,7 @@
 
 </div>
 
-<!-- Assign Task Modal -->
+
 <div class="modal fade" id="assignTaskModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -190,13 +190,13 @@
         </div>
         <div class="modal-body">
 
-          <!-- Task Title -->
+         
           <div class="mb-3">
             <label class="form-label">Task Title</label>
             <input type="text" name="title" class="form-control" required>
           </div>
 
-          <!-- Task Type -->
+          
           <div class="mb-3">
             <label class="form-label">Task Type</label>
             <select name="task_type" class="form-select" required>
@@ -209,13 +209,13 @@
             </select>
           </div>
 
-          <!-- ✅ Due Date -->
+          
           <div class="mb-3">
             <label class="form-label">Due Date</label>
             <input type="date" name="due_date" class="form-control">
           </div>
 
-          <!-- ✅ Select Students (with Select All when >= 2) -->
+          
           <div class="mb-3">
             <label class="form-label">Select Students</label>
 
@@ -235,7 +235,7 @@
             </div>
           </div>
 
-          <!-- Attachment -->
+      
           <div class="mb-3">
             <label class="form-label">Attach File (optional)</label>
             <input type="file" name="attachment" class="form-control">
@@ -254,7 +254,6 @@
 </div>
 
 <script>
-  // Toggle Select All for student table
   let tableAllSelected = false;
   const tableSelectAllBtn = document.getElementById('selectAll');
 
@@ -267,8 +266,7 @@
 
     this.checked = tableAllSelected;
   });
-
-  // Toggle Select All for modal
+  
   let modalAllSelected = false;
   const modalSelectAllBtn = document.getElementById('modalSelectAllBtn');
 

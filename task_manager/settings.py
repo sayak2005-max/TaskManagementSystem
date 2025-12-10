@@ -9,15 +9,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# ---------------------------------------------------------------------
-# Base Directory + Load .env
-# ---------------------------------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-# ---------------------------------------------------------------------
-# Core settings
-# ---------------------------------------------------------------------
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-replace-this-in-production",
@@ -30,9 +25,7 @@ ALLOWED_HOSTS = os.environ.get(
     "127.0.0.1,localhost",
 ).split(",")
 
-# ---------------------------------------------------------------------
-# Installed apps
-# ---------------------------------------------------------------------
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -41,13 +34,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Local apps
+    
     "tasks",
 ]
 
-# ---------------------------------------------------------------------
-# Middleware
-# ---------------------------------------------------------------------
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -60,9 +51,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "task_manager.urls"
 
-# ---------------------------------------------------------------------
-# Templates
-# ---------------------------------------------------------------------
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -81,9 +70,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "task_manager.wsgi.application"
 
-# ---------------------------------------------------------------------
-# Database (SQLite for local dev)
-# ---------------------------------------------------------------------
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -91,9 +78,7 @@ DATABASES = {
     }
 }
 
-# ---------------------------------------------------------------------
-# Password validation
-# ---------------------------------------------------------------------
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -109,17 +94,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# ---------------------------------------------------------------------
-# Internationalization
-# ---------------------------------------------------------------------
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
-# ---------------------------------------------------------------------
-# Static & Media files
-# ---------------------------------------------------------------------
+
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
@@ -129,40 +110,24 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ---------------------------------------------------------------------
-# Custom user model
-# ---------------------------------------------------------------------
+
 AUTH_USER_MODEL = "tasks.CustomUser"
 
-# ---------------------------------------------------------------------
-# Default primary key field type
-# ---------------------------------------------------------------------
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---------------------------------------------------------------------
-# Email configuration (from environment)
-#   For real Gmail sending, put in .env:
-#   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-#   EMAIL_HOST=smtp.gmail.com
-#   EMAIL_PORT=587
-#   EMAIL_USE_TLS=1
-#   EMAIL_HOST_USER=your_email@gmail.com
-#   EMAIL_HOST_PASSWORD=your_app_password
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# Email configuration (Gmail)
-# ---------------------------------------------------------------------
+
 EMAIL_BACKEND = os.environ.get(
     "EMAIL_BACKEND",
-    "django.core.mail.backends.smtp.EmailBackend",  # real SMTP backend
+    "django.core.mail.backends.smtp.EmailBackend", 
 )
 
-# Gmail SMTP server
+
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 
-# Your Gmail + App Password
+
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "sayakmondal403@gmail.com")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "mortqpccnugueioz")
 
@@ -172,9 +137,7 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 )
 
 
-# ---------------------------------------------------------------------
-# Logging (simple console logging)
-# ---------------------------------------------------------------------
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

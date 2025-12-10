@@ -1,4 +1,4 @@
-# tasks/forms.py
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
@@ -108,14 +108,12 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         super(TaskForm, self).__init__(*args, **kwargs)
-        # show only students to assign
         self.fields["assigned_to"].queryset = User.objects.filter(role="Student")
 
 
 class StudentTaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        # only status is intended to be changed by student
         fields = ["status"]
         widgets = {
             "status": forms.Select(
@@ -169,7 +167,6 @@ class CustomUserCreationForm(UserCreationForm):
             )
 
     def save(self, commit=True):
-        # Ensure role and group assignment happen at save time
         user = super().save(commit=False)
         role = self.cleaned_data.get("role")
         if role:

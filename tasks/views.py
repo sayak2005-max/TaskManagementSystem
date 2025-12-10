@@ -1,4 +1,3 @@
-# tasks/views.py
 import csv
 import time
 import logging
@@ -31,9 +30,6 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-# ------------------ Helpers & Decorators ------------------
-
-
 def rate_limit(limit: int = 20, per: int = 60):
     """
     Basic per-session rate limiter (in-memory cache).
@@ -48,7 +44,6 @@ def rate_limit(limit: int = 20, per: int = 60):
             cache_key = f"rate_limit_{request.session.session_key}_{view_func.__name__}"
             requests = cache.get(cache_key, [])
             now = datetime.now()
-            # keep only recent timestamps
             requests = [ts for ts in requests if ts > now - timedelta(seconds=per)]
             if len(requests) >= limit:
                 messages.warning(request, "Please slow down. Too many requests.")
@@ -66,10 +61,6 @@ def is_admin(user) -> bool:
     """Helper used by user_passes_test."""
     return user.is_authenticated and getattr(user, "role", None) == "Admin"
 
-
-# ------------------ Home ------------------
-
-
 @rate_limit(limit=20, per=60)
 @never_cache
 def home(request):
@@ -78,9 +69,6 @@ def home(request):
     response["Pragma"] = "no-cache"
     response["Expires"] = "0"
     return response
-
-
-# ------------------ Teacher dashboard helper ------------------
 
 
 def get_teacher_dashboard_context(request):
@@ -113,10 +101,6 @@ def get_teacher_dashboard_context(request):
         "tasks_due_today": tasks_due_today,
         "teacher": request.user,
     }
-
-
-# ------------------ Teacher views ------------------
-
 
 @login_required
 def teacher_dashboard(request):
@@ -197,7 +181,6 @@ def assign_task(request):
         messages.error(request, "Unauthorized")
         return redirect("home")
 
-    # Students list for form
     students = CustomUser.objects.filter(role="Student").order_by("first_name", "last_name")
 
     if request.method == "POST":
@@ -205,11 +188,7 @@ def assign_task(request):
         task_type = request.POST.get("task_type", "").strip()
         due_date = request.POST.get("due_date") or None
         attachment = request.FILES.get("attachment")
-
-        # Supports both new & old field names
         selected_students = request.POST.getlist("students") or request.POST.getlist("selected_students")
-
-        # --- Validation ---
         if not title:
             messages.error(request, "Please enter a task title.")
             return render(request, "tasks/assign_task.html", {"students": students})
@@ -217,8 +196,6 @@ def assign_task(request):
         if not selected_students:
             messages.warning(request, "Please select at least one student.")
             return render(request, "tasks/assign_task.html", {"students": students})
-
-        # --- Assign Task to every student ---
         created_count = 0
         for sid in selected_students:
             try:
@@ -242,8 +219,6 @@ def assign_task(request):
             f"Task '{title}' assigned to {created_count} student(s)."
         )
         return redirect("teacher_dashboard")
-
-    # --- GET request ---
     return render(request, "tasks/assign_task.html", {"students": students})
 
 
@@ -264,10 +239,6 @@ def upload_notes(request):
         return redirect("teacher_dashboard")
 
     return redirect("teacher_dashboard")
-
-
-# ------------------ AJAX endpoints ------------------
-
 
 @login_required
 @require_POST
@@ -308,10 +279,6 @@ def create_task_ajax(request):
 
     task = Task.objects.create(title=title, created_by=user)
     return JsonResponse({"message": "Task created", "task_id": task.id}, status=200)
-
-
-# ------------------ Task CRUD ------------------
-
 
 @login_required
 def update_task(request, task_id):
@@ -370,8 +337,6 @@ def update_task_status(request, task_id):
                 return JsonResponse({"success": True, "status": task.status})
             messages.success(request, "Task status updated.")
             return redirect("student_dashboard")
-
-        # invalid form
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse(
                 {"success": False, "errors": form.errors.get_json_data()},
@@ -391,10 +356,6 @@ def update_task_status(request, task_id):
         )
 
     return redirect("student_dashboard")
-
-
-# ------------------ Student views ------------------
-
 
 @login_required
 def student_dashboard(request):
@@ -418,10 +379,6 @@ def student_dashboard(request):
             "notes": notes,
         },
     )
-
-
-# ------------------ Admin views ------------------
-
 
 @login_required
 @staff_member_required
@@ -531,10 +488,6 @@ def generate_task_report(request):
 
     return response
 
-
-# ------------------ User management (Teacher/Admin) ------------------
-
-
 @login_required
 @user_passes_test(is_admin)
 def list_teachers(request):
@@ -576,10 +529,6 @@ def delete_student(request, student_id):
     messages.success(request, "Student deleted successfully!")
     return redirect("student_list")
 
-
-# ------------------ Authentication (Register / Login / OTP) ------------------
-
-
 SESSION_REG_DATA = "reg_data"
 SESSION_OTP = "otp"
 SESSION_OTP_TIME = "otp_time"
@@ -594,30 +543,23 @@ def register(request):
     Step 2: user submits OTP (via verify_registration_otp).
     """
     if request.method == "POST":
-        # IF USER CLICKED "VERIFY OTP" BUTTON
         if "verify_otp" in request.POST:
             return verify_registration_otp(request)
 
-        # IF USER CLICKED "SEND OTP"
         form = CustomUserCreationForm(request.POST)
 
         if form.is_valid():
-            # In test runs we create the user immediately (tests expect this behaviour)
             if getattr(settings, "TESTING", False) or "test" in sys.argv:
                 form.save()
                 messages.success(request, "Registration complete. You can now log in.")
                 return redirect("login")
-
-            # Save form data temporarily in session for OTP flow
             request.session[SESSION_REG_DATA] = form.cleaned_data
 
-            # Generate OTP and meta
             otp = generate_otp()
             request.session[SESSION_OTP] = otp
             request.session[SESSION_OTP_TIME] = time.time()
             request.session[SESSION_OTP_ATTEMPTS] = 0
 
-            # send OTP email
             try:
                 email: str = form.cleaned_data["email"]
                 send_mail(
@@ -644,7 +586,6 @@ def register(request):
                 {"form": form, "show_otp": True},
             )
 
-        # Form invalid → return
         return render(request, "tasks/register.html", {"form": form})
 
     form = CustomUserCreationForm()
@@ -703,7 +644,6 @@ def verify_registration_otp(request):
             {"form": form, "show_otp": True},
         )
 
-    # OTP correct — create user
     form = CustomUserCreationForm(reg_data)
     if form.is_valid():
         form.save()
@@ -730,36 +670,26 @@ def login_view(request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
         selected_role = request.POST.get("role") or ""
-
-        # context is ALWAYS defined inside POST
         context = {"username": username, "role": selected_role}
-
-        # 1) Authenticate user
         user = authenticate(request, username=username, password=password)
 
         if user is None:
             messages.error(request, "Invalid username or password.")
             return render(request, "tasks/login.html", context)
-
-        # From here, user is not None -> help type checker
         user = cast(CustomUser, user)
 
-        # 2) Role check (optional)
         if selected_role and getattr(user, "role", None) != selected_role:
             messages.error(request, "Role does not match.")
             return render(request, "tasks/login.html", context)
 
-        # 3) Generate OTP
         otp = generate_otp()
 
-        # 4) Store session fallback OTP (ALWAYS set)
         request.session["otp_fallback"] = {
             "user_id": user.id,
             "otp": otp,
             "sent_at": time.time(),
         }
 
-        # 5) Try to store OTP on CustomUser model (if set_otp exists)
         try:
             if hasattr(user, "set_otp"):
                 user.set_otp(otp)
@@ -769,7 +699,6 @@ def login_view(request):
                 "Failed to set OTP on user model; using session-based fallback only"
             )
 
-        # 6) Send OTP email
         try:
             recipient_list = [user.email] if getattr(user, "email", "") else []
             send_mail(
@@ -791,7 +720,6 @@ def login_view(request):
 
         return redirect("verify_otp")
 
-    # GET
     return render(request, "tasks/login.html")
 
 
@@ -861,8 +789,6 @@ def resend_otp(request):
         return JsonResponse({"success": False, "error": "no_session"}, status=400)
 
     user = get_object_or_404(CustomUser, id=user_id)
-
-    # prevent too-frequent resends
     last_sent_ts = request.session.get("otp_sent_at")
     if last_sent_ts:
         now_ts = time.time()
@@ -888,7 +814,7 @@ def resend_otp(request):
             subject="Your Login OTP (resend)",
             message=f"Your OTP is {otp}. It is valid for 5 minutes.",
             from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-            recipient_list=[user.email],  # type: ignore[arg-type]
+            recipient_list=[user.email],  
             fail_silently=False,
         )
     except Exception:
@@ -930,10 +856,6 @@ def student_update_status_ajax(request):
     task.save()
 
     return JsonResponse({"success": True}, status=200)
-
-
-# ------------------ Simple listing helpers ------------------
-
 
 @login_required
 def student_list(request):

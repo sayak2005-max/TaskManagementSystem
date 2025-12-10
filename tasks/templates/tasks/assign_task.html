@@ -8,31 +8,31 @@
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
-      <!-- Task Title -->
+      
       <div class="mb-3">
         <label class="form-label">Task Title</label>
         <input type="text" name="title" class="form-control" required>
       </div>
 
-      <!-- Due Date -->
+    
       <div class="mb-3">
         <label class="form-label">Due Date</label>
         <input type="date" name="due_date" class="form-control">
       </div>
 
-      <!-- Task Type -->
+      
       <div class="mb-3">
         <label class="form-label">Task Type (optional)</label>
         <input type="text" name="task_type" class="form-control" placeholder="Homework, Classwork, etc.">
       </div>
 
-      <!-- Attachment -->
+  
       <div class="mb-3">
         <label class="form-label">Attachment (optional)</label>
         <input type="file" name="attachment" class="form-control">
       </div>
 
-      <!-- Students Multi-Select -->
+      
       <div class="mb-3">
         <label class="form-label">Select Students</label>
 
@@ -49,13 +49,11 @@
         </select>
       </div>
 
-      <!-- Submit -->
       <button type="submit" class="btn btn-primary w-100">Assign Task</button>
     </form>
   </div>
 </div>
 
-<!-- JS: Select All button -->
 <script>
   const btn = document.getElementById('selectAllBtn');
   if (btn) {

@@ -3,8 +3,6 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-
-    <!-- 🟢 Logged-in Role Display -->
     <div class="alert alert-info text-center fw-bold shadow-sm rounded-3 mb-4">
         Logged in as: <span class="text-primary">{{ request.user.role }}</span>
     </div>
@@ -33,7 +31,7 @@
         </div>
     </div>
 
-    <!-- Statistics Cards -->
+    
     <div class="row g-3 mb-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white h-100">
@@ -112,7 +110,7 @@
         </div>
     </div>
 
-    <!-- Quick Access Cards -->
+    
     <div class="row g-3">
         <div class="col-md-6">
             <div class="card h-100">
@@ -160,7 +158,7 @@
     </div>
 </div>
 
-<!-- Task Report Modal -->
+
 <div class="modal fade" id="taskReportModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
