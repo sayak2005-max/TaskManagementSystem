@@ -22,8 +22,9 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "1") != "0"
 
 ALLOWED_HOSTS = os.environ.get(
     "DJANGO_ALLOWED_HOSTS",
-    "127.0.0.1,localhost",
+    "sayak0904.pythonanywhere.com,127.0.0.1,localhost",
 ).split(",")
+
 
 
 INSTALLED_APPS = [
